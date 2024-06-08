@@ -34,8 +34,8 @@ def Record(filename):
 
     # time.sleep(20)
     GPIO.wait_for_edge(18, GPIO.FALLING)
-    print('aufgelegt')
-    time.sleep(0.1)  # wait 100 ms to give CPU chance to do other things
+    print('aufgelegt\n')
+    time.sleep(0.5)  # bounce verhindern
 
     os.killpg(rec_proc.pid, signal.SIGTERM)
     rec_proc.terminate()
@@ -46,20 +46,16 @@ def Record(filename):
 # *****************START***************************
 
 while 1:
-
-    print('start')
     # wait for phone to be lifted
     GPIO.wait_for_edge(18, GPIO.RISING)
-    print('abgenommen')
+    print('abgenommen\n')
     time.sleep(0.1)  # wait 100 ms to give CPU chance to do other things
 
     Pulses = PulseCounter()
     print('Pulses: ' + str(Pulses))
 
     player = subprocess.run(["mpg123", basepath + str(Pulses) + ".mp3", "-q"])
-    # time.sleep(0.1)
     playBeep = subprocess.run(["mpg123", basepath + "beep.mp3", "-q"])
-    time.sleep(0.1)
     # Record and save
     CurrTime = str(time.strftime("%d_%b_%Y_%H:%M:%S__"))
     filename = basepath + "records/" + CurrTime + str(Pulses) + ".wav"
