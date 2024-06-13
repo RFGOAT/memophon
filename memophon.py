@@ -6,6 +6,8 @@ import time
 import signal
 
 basepath = "/home/rfgoat/MemophonOnPi/"
+MaxRecordTime = 60 * 1  # 60s * 10 min
+
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -29,22 +31,22 @@ def Record(filename):
     proc_args = ['arecord', '-D', 'plughw:2,0', '-c1', '-r', '44100', '-f',
                  'S32_LE', '-t', 'wav', '-V', 'mono', '-v', str(filename)]
     rec_proc = subprocess.Popen(proc_args, shell=False, preexec_fn=os.setsid)
-    print("startRecordingArecord()> rec_proc pid= " + str(rec_proc.pid))
-    print("startRecordingArecord()> recording started")
+    print("startRecordingArecord()> rec_proc pid= " + str(rec_proc.pid) + "\n")
 
     # time.sleep(20)
-    GPIO.wait_for_edge(18, GPIO.FALLING)
-    print('aufgelegt\n')
+    t_end = time.time() + MaxRecordTime
+    while time.time() < t_end:
+        GPIO.wait_for_edge(18, GPIO.FALLING)
+        print('aufgelegt\n')
     time.sleep(0.5)  # bounce verhindern
 
     os.killpg(rec_proc.pid, signal.SIGTERM)
     rec_proc.terminate()
     rec_proc = None
-    print("stopRecordingArecord()> Recording stopped")
+    print("stopRecordingArecord()> Recording stopped \n")
 
 
 # *****************START***************************
-
 while 1:
     # wait for phone to be lifted
     GPIO.wait_for_edge(18, GPIO.RISING)
